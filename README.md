@@ -11,7 +11,7 @@ Sensor | Product | Properties
 --- | --- | ---
 Radar Sensor | [RCWL-0516](Radar_RCWL-0516/README.md) | movment detection only <br> no distance information <br> detects human and animals only (due to water)  
 Infrared Sensor | [Flying-Fish](IR_Flying-Fish/REAMDE.md) | can be used for distance or proximity measurements <br> does not work in dark environments <br> can measure emission of heat by an object <br> not really suited for outdoor applications...
-Laser Sensor | [Waveshare Laser Sensor](Laser_Waveshare/REAMDE.md) | TBD
+Laser Sensor | [Waveshare Laser Sensor](Laser_Waveshare/REAMDE.md) | 650nm laser diode + detector <br> range in first tests was below 1m <br> kind of dangerous... <br> essentially a light barrier, no distance measurement
 
 ## Alternative Sensors
 

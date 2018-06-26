@@ -21,4 +21,5 @@ PIR (passive infrared sensor) | TBD | can detect motion <br> if raw signal is an
 Ultrasonic Sensors | TBD | distance sensor <br> not too good for human detection (clothes do not reflect sound well)
 
 
-
+## Other Stuff
+Master's thesis about agent-based modelling of park visitors (there might be some hints for automated visitor counting, the thesis itself does not contain low-level hardware info): http://www.geo.uzh.ch/dam/jcr:42e776a7-9d10-4172-9661-c4febc30ae7d/2013_masterarbeit_martinbaumgartner_red.pdf

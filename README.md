@@ -4,6 +4,8 @@
 
 [General information about the City Forest Challenge](https://makezurich.ch/box/2/)
 
+[People Monitoring Sihlwald](http://www.geo.uzh.ch/dam/jcr:42e776a7-9d10-4172-9661-c4febc30ae7d/2013_masterarbeit_martinbaumgartner_red.pdf)
+
 
 ## Sensors from the MakeZurich Box
 

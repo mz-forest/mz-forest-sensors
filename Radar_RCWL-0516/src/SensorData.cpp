@@ -90,10 +90,10 @@ int SensorData::printBins() {
 }
 
 int SensorData::printData() {
-    Serial.print("index: ");
-    Serial.println(_dataIndex);
-    Serial.print("overflow: ");
-    Serial.println(_dataOverflow);
+    //Serial.print("index: ");
+    //Serial.println(_dataIndex);
+    //Serial.print("overflow: ");
+    //Serial.println(_dataOverflow);
     for (int i=0; i<_dataIndex; i++) {
         Serial.print("[");
         Serial.print(i);

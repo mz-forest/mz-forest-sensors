@@ -12,7 +12,9 @@
 // - Red LED (1x)
 // - 220R resistor (2x)
 
+#include "Arduino.h"
 #include "src/SensorData.h"
+#include "src/RadarSensor_RCWL0516.h"
 
 #ifdef ARDUINO_SAMD_FEATHER_M0 // pin defines for Adafruit Feather M0
 const int LED_RED = 0;
@@ -24,36 +26,34 @@ const int SENSOR_EN_PIN = 12;
 
 // pin defines for other boards can be added here.
 
-typedef enum {
-  SENSOR_STATE_ON,
-  SENSOR_STATE_OFF
-} sensor_state_t;
-
-volatile sensor_state_t sensorState = SENSOR_STATE_OFF;
-
 SensorData data;
 int numBins = 3;
-unsigned int binBorders[] = {2, 8}; // size is numBins-1
+unsigned int binBorders[] = {4000, 8000, 12000}; // size is numBins-1
 
-
-volatile unsigned int movementOnTime, movementDuration;
+RadarSensor_RCWL0516 radarSensor;
 
 void setup() {
-  configurePins();
-  data.setBinBorders(binBorders, numBins-1);
-  // set default pin levels
-  digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_GREEN, LOW);
-  digitalWrite(LED_BLUE, LOW);
-  digitalWrite(SENSOR_EN_PIN, HIGH);
   Serial.begin(9600);
+  
+  configureLedPins();
+  
+  data.setBinBorders(binBorders, numBins-1);
+  
+  radarSensor.setInterruptPin(SENSOR_INT_PIN);
+  radarSensor.setEnablePin(SENSOR_EN_PIN);
+  
+  radarSensor.configure();
+  
   delay(10000);
+  
   digitalWrite(LED_GREEN, HIGH);
   
   // clear data and start data acquisition
   data.clear();
-  attachInterrupt(digitalPinToInterrupt(SENSOR_INT_PIN), sensorIRQ, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_INT_PIN), radarSensorIRQ, CHANGE); // enable interrupt
+  radarSensor.enable();
 
+  
 }
 
 void loop() {
@@ -64,18 +64,27 @@ void loop() {
   delay(10000);
 }
 
-void configurePins() {
-  // configure LED pins
+void configureLedPins() {
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
-  // configure interrupt pin
-  pinMode(SENSOR_INT_PIN, INPUT_PULLDOWN);
-  // configure sensor enable pin
-  pinMode(SENSOR_EN_PIN, OUTPUT);
+  digitalWrite(LED_RED, LOW);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_BLUE, LOW);
 }
 
-void sensorIRQ() {
+
+// interrupt stuff
+
+typedef enum {
+  SENSOR_STATE_ON,
+  SENSOR_STATE_OFF
+} sensor_state_t;
+
+void radarSensorIRQ() {
+  static sensor_state_t sensorState = SENSOR_STATE_ON;
+  static unsigned int movementOnTime = 0;
+
   if (digitalRead(SENSOR_INT_PIN) == HIGH) {
     // start of movement detected
     sensorState = SENSOR_STATE_ON;
@@ -85,7 +94,7 @@ void sensorIRQ() {
     // end of movement detected
     if (sensorState == SENSOR_STATE_ON) { // check for correct toggling sequence
       sensorState = SENSOR_STATE_OFF;
-      movementDuration = millis() - movementOnTime;
+      unsigned int movementDuration = millis() - movementOnTime;
       data.add(movementDuration);
     }
   }

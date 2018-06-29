@@ -2,7 +2,8 @@
 
 #include "RadarSensor_RCWL0516.h"
 
-RadarSensor_RCWL0516::RadarSensor_RCWL0516() : _interruptPin(-1), _enablePin(-1), _configured(false) {
+RadarSensor_RCWL0516::RadarSensor_RCWL0516() : 
+_interruptPin(-1), _enablePin(-1), _configured(false) {
 
 }
 
@@ -30,7 +31,11 @@ int RadarSensor_RCWL0516::configure() {
     if (_interruptPin < 0 || _enablePin < 0) {
         return 1;
     }
+    #ifdef ARDUINO_SAMD_FEATHER_M0
     pinMode(_interruptPin, INPUT_PULLDOWN);
+    #else
+    pinMode(_interruptPin, INPUT);
+    #endif
     // configure sensor enable pin
     pinMode(_enablePin, OUTPUT);
     _configured = true;

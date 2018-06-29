@@ -22,13 +22,17 @@ const int LED_GREEN = 1;
 const int LED_BLUE = 5;
 const int SENSOR_INT_PIN = 13; // sensor interrupt pin
 const int SENSOR_EN_PIN = 12;
+#else // pin defines for TheThingsUno (Arduino Leonardo)
+const int LED_RED = 0;
+const int LED_GREEN = 1;
+const int LED_BLUE = 2;
+const int SENSOR_INT_PIN = 3; // sensor interrupt pin
+const int SENSOR_EN_PIN = 4;
 #endif
-
-// pin defines for other boards can be added here.
 
 SensorData data;
 int numBins = 3;
-unsigned int binBorders[] = {4000, 8000, 12000}; // size is numBins-1
+unsigned int binBorders[] = {6000, 10000}; // size is numBins-1
 
 RadarSensor_RCWL0516 radarSensor;
 
@@ -37,8 +41,7 @@ void setup() {
   
   configureLedPins();
   
-  data.setBinBorders(binBorders, numBins-1);
-  
+  data.setBinBorders(binBorders, numBins-1); 
   radarSensor.setInterruptPin(SENSOR_INT_PIN);
   radarSensor.setEnablePin(SENSOR_EN_PIN);
   

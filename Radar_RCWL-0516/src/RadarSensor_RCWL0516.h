@@ -6,8 +6,6 @@
 #include "Arduino.h"
 #include "SensorData.h"
 
-
-
 class RadarSensor_RCWL0516 {
     public:
         RadarSensor_RCWL0516();
@@ -29,8 +27,6 @@ class RadarSensor_RCWL0516 {
         int _interruptPin;
         int _enablePin;
         bool _configured;
-        
-        
 
 };
 

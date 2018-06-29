@@ -17,55 +17,53 @@
 const int LED_RED = 0;
 const int LED_GREEN = 1;
 const int LED_BLUE = 5;
-const int SENSOR_OUT_PIN = 13;
+const int SENSOR_INT_PIN = 13; // sensor interrupt pin
 const int SENSOR_EN_PIN = 12;
 #endif
 
 // pin defines for other boards can be added here.
 
-int movementOn = LOW; // LOW means no movement detected (active high signal)
-int movementOnLast = LOW;
-
-unsigned long startTime;
+volatile int count = 0;
 
 void setup() {
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
-  pinMode(SENSOR_OUT_PIN, INPUT);
-  pinMode(SENSOR_EN_PIN, OUTPUT);
+  configurePins();
+  attachInterrupt(digitalPinToInterrupt(SENSOR_INT_PIN), sensorIRQ, RISING);
+
+  // set default pin levels
   digitalWrite(LED_RED, LOW);
   digitalWrite(LED_GREEN, HIGH);
   digitalWrite(LED_BLUE, LOW);
-  digitalWrite(SENSOR_EN_PIN, LOW);
+  digitalWrite(SENSOR_EN_PIN, HIGH);
   Serial.begin(9600);
-  startTime = millis();
-  
+  delay(5000);
 }
 
 void loop() {
-  unsigned long now = millis();
-  if (((now-startTime)/5000)%2 == 0) {
-    digitalWrite(SENSOR_EN_PIN, LOW);
-    digitalWrite(LED_BLUE, LOW);
+  
+  Serial.print("count ");
+  Serial.println(count);
+  if (count > 5) {
+    digitalWrite(LED_RED, HIGH);
+    
   }
-  else {
-    digitalWrite(SENSOR_EN_PIN, HIGH);
+  if (count > 10) {
     digitalWrite(LED_BLUE, HIGH);
   }
-  movementOnLast = movementOn;
-  movementOn = digitalRead(SENSOR_OUT_PIN);
-  if (movementOn != movementOnLast) {
-    if (movementOn == HIGH) {
-        Serial.println("MOVEMENT DETECTED!");
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_GREEN, LOW);
-    }
-    else {
-        Serial.println("silent");
-        digitalWrite(LED_RED, LOW);
-        digitalWrite(LED_GREEN, HIGH);
-    }  
-  }
-  delay(200);
+
+  delay(1000);
+}
+
+void configurePins() {
+  // configure LED pins
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  // configure interrupt pin
+  pinMode(SENSOR_INT_PIN, INPUT_PULLDOWN);
+  // configure sensor enable pin
+  pinMode(SENSOR_EN_PIN, OUTPUT);
+}
+
+void sensorIRQ() {
+  count++;
 }

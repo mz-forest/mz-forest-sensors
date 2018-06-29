@@ -12,6 +12,7 @@
 // - Red LED (1x)
 // - 220R resistor (2x)
 
+#include "src/SensorData.h"
 
 #ifdef ARDUINO_SAMD_FEATHER_M0 // pin defines for Adafruit Feather M0
 const int LED_RED = 0;
@@ -23,34 +24,44 @@ const int SENSOR_EN_PIN = 12;
 
 // pin defines for other boards can be added here.
 
-volatile int count = 0;
+typedef enum {
+  SENSOR_STATE_ON,
+  SENSOR_STATE_OFF
+} sensor_state_t;
+
+volatile sensor_state_t sensorState = SENSOR_STATE_OFF;
+
+SensorData data;
+int numBins = 3;
+unsigned int binBorders[] = {2, 8}; // size is numBins-1
+
+
+volatile unsigned int movementOnTime, movementDuration;
 
 void setup() {
   configurePins();
-  attachInterrupt(digitalPinToInterrupt(SENSOR_INT_PIN), sensorIRQ, RISING);
-
+  data.setBinBorders(binBorders, numBins-1);
   // set default pin levels
   digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_GREEN, HIGH);
+  digitalWrite(LED_GREEN, LOW);
   digitalWrite(LED_BLUE, LOW);
   digitalWrite(SENSOR_EN_PIN, HIGH);
   Serial.begin(9600);
-  delay(5000);
+  delay(10000);
+  digitalWrite(LED_GREEN, HIGH);
+  
+  // clear data and start data acquisition
+  data.clear();
+  attachInterrupt(digitalPinToInterrupt(SENSOR_INT_PIN), sensorIRQ, CHANGE);
+
 }
 
 void loop() {
-  
-  Serial.print("count ");
-  Serial.println(count);
-  if (count > 5) {
-    digitalWrite(LED_RED, HIGH);
-    
-  }
-  if (count > 10) {
-    digitalWrite(LED_BLUE, HIGH);
-  }
-
-  delay(1000);
+  Serial.println("Data dump");
+  data.printBins();
+  data.printData();
+  data.clear();
+  delay(10000);
 }
 
 void configurePins() {
@@ -65,5 +76,17 @@ void configurePins() {
 }
 
 void sensorIRQ() {
-  count++;
+  if (digitalRead(SENSOR_INT_PIN) == HIGH) {
+    // start of movement detected
+    sensorState = SENSOR_STATE_ON;
+    movementOnTime = millis();  
+  }
+  else {
+    // end of movement detected
+    if (sensorState == SENSOR_STATE_ON) { // check for correct toggling sequence
+      sensorState = SENSOR_STATE_OFF;
+      movementDuration = millis() - movementOnTime;
+      data.add(movementDuration);
+    }
+  }
 }

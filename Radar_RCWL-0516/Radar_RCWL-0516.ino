@@ -22,7 +22,7 @@ const int LED_GREEN = 1;
 const int LED_BLUE = 5;
 const int SENSOR_INT_PIN = 13; // sensor interrupt pin
 const int SENSOR_EN_PIN = 12;
-#else // pin defines for TheThingsUno (Arduino Leonardo)
+#else // pin defines for TheThings Uno (Arduino Leonardo)
 const int LED_RED = 0;
 const int LED_GREEN = 1;
 const int LED_BLUE = 2;

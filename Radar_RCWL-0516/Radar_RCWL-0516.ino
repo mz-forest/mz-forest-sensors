@@ -13,86 +13,26 @@
 // - 220R resistor (2x)
 
 #include "Arduino.h"
-#include "src/SensorData.h"
-#include "src/RadarSensor_RCWL0516.h"
+#include "src/RadarSensor.h"
 
-#ifdef ARDUINO_SAMD_FEATHER_M0 // pin defines for Adafruit Feather M0
-cconst int SENSOR_INT_PIN = 13; // sensor interrupt pin
-const int SENSOR_EN_PIN = 12;
-const int DEBUG_PIN = -1; // TBD
-#else // pin defines for TheThings Uno (Arduino Leonardo)
-const int SENSOR_INT_PIN = 3; // sensor interrupt pin
-const int SENSOR_EN_PIN = 4;
-const int DEBUG_PIN = 13;
-#endif
-
-SensorData data;
-int numBins = 3;
-unsigned int binBorders[] = {6000, 10000}; // size is numBins-1
-
-RadarSensor_RCWL0516 radarSensor;
 
 void setup() {
   Serial.begin(9600);
   
-  configureLedPins();
-  
-  data.setBinBorders(binBorders, numBins-1); 
-  radarSensor.setInterruptPin(SENSOR_INT_PIN);
-  radarSensor.setEnablePin(SENSOR_EN_PIN);
-  
-  radarSensor.configure();
+  setupRadarSensor();
   
   delay(10000);
   
-  digitalWrite(LED_GREEN, HIGH);
-  
-  // clear data and start data acquisition
-  data.clear();
-  attachInterrupt(digitalPinToInterrupt(SENSOR_INT_PIN), radarSensorIRQ, CHANGE); // enable interrupt
-  radarSensor.enable();
-
+  enableRadarSensor();
   
 }
 
 void loop() {
-  Serial.println("Data dump");
-  data.printBins();
-  data.printData();
-  data.clear();
+  printRadarSensor();
   delay(10000);
 }
 
-void configureLedPins() {
-  pinMode(DEBUG_PIN, OUTPUT);
-  digitalWrite(DEBUG_PIN, LOW);
-}
 
 
 // interrupt stuff
 
-typedef enum {
-  SENSOR_STATE_ON,
-  SENSOR_STATE_OFF
-} sensor_state_t;
-
-void radarSensorIRQ() {
-  static sensor_state_t sensorState = SENSOR_STATE_ON;
-  static unsigned int movementOnTime = 0;
-
-  if (digitalRead(SENSOR_INT_PIN) == HIGH) {
-    digitalWrite(DEBUG_PIN, HIGH);
-    // start of movement detected
-    sensorState = SENSOR_STATE_ON;
-    movementOnTime = millis();  
-  }
-  else {
-    digitalWrite(DEBUG_PIN, LOW);
-    // end of movement detected
-    if (sensorState == SENSOR_STATE_ON) { // check for correct toggling sequence
-      sensorState = SENSOR_STATE_OFF;
-      unsigned int movementDuration = millis() - movementOnTime;
-      data.add(movementDuration);
-    }
-  }
-}
